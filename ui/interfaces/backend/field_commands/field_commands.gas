@@ -1,0 +1,984 @@
+[field_commands]
+{
+	skrit = [[
+		owner = UIWindow;
+		float curSpeed$;
+		float minSpeed$ = 0.1;
+		float maxSpeed$ = 10.0;
+		
+		void gen_slider_gamespeed_change$()
+		{
+			// the slider value isn't initialized until we're ingame
+            if (WorldState.CurrentState == WS_SP_INGAME || WorldState.CurrentState == WS_MP_INGAME)
+			{
+				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
+				curSpeed$ = slider$.Value * 0.1;
+				
+				if (curSpeed$ >= minSpeed$ && curSpeed$ <= maxSpeed$)
+				{
+					WorldOptions.SetGameSpeed(curSpeed$, true);
+				}
+			}
+		}
+		
+		void gen_slider_gamespeed_destroyed$()
+		{
+			// speeds above 6.0 mess with the main menu animations
+			WorldOptions.SetGameSpeed(1.0);
+		}
+		
+		void gen_slider_gamespeed_toggle_visibility$()
+		{
+			// sync the slider visibility with the one of the move button
+			UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
+			UIButton moveButton$ = QueryDerivedButton(UIShell.FindUIWindow("button_movement", "field_commands"));
+			slider$.visible = moveButton$.visible;
+		}
+		
+		void gen_slider_gamespeed_itemactivate$()
+		{
+			curSpeed$ = WorldOptions.GameSpeed;
+			gen_slider_gamespeed_toggle_visibility$();
+			
+			UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
+			slider$.value = Math.ToInt(WorldOptions.GameSpeed * 10.0);
+			
+			// force a UI refresh
+			UIShell.SendUIMessage(msg_calculateslidersize, "gen_slider_gamespeed", "field_commands");
+		}
+	]];
+	
+	[t:slider,n:gen_slider_gamespeed]
+	{
+		alpha = 1.000000;
+		bottom_anchor = 74;
+		common_control = true;
+		common_template = track;
+		draw_order = 15;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 150,220,300,236;
+		right_anchor = 216;
+		uvcoords = 0.000000,0.000000,1.000000,1.000000;
+		wrap_mode = clamp;
+		slide_axis = horizontal;
+		min_value = 1;
+		max_value = 100; // should always be equal to maxSpeed$ * 10
+		step_value = 1;
+		default_value = 10;
+		show_popup_value = true;
+		popup_value_font = b_gui_fnt_12p_copperplate-light;
+		[messages]
+		{
+			onbuttonpress = playsound(s_e_IH_select_char);
+			onchange = call(gen_slider_gamespeed_change$);
+			ondestroyed = call(gen_slider_gamespeed_destroyed$); // fixes a bug with the main menu animations at high speeds
+			onitemactivate = call(gen_slider_gamespeed_itemactivate$); // hides the slider if the field commands were initially hidden
+		}
+	}
+	
+  i intended_resolution_height = 480;
+  i intended_resolution_width = 640;
+  b interface = true;
+	[t:button,n:button_attack]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 131;
+	  b common_control = true;
+		common_template = button_4;
+	  x draw_order = 8;
+		group = orders;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 428,369,576,385;
+		right_anchor = 212;
+		rollover_help = button_attack;
+		uvcoords = 0.000000,0.000000,1.000000,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(orders_attack);
+		}
+		[t:text,n:text_attack]
+		{
+		  f alpha = 1.000000;
+		  b common_control = false;
+			common_template = ;
+		  x draw_order = 21;
+		  x font_color = -1;
+		  x font_size = 0;
+			font_type = b_gui_fnt_12p_copperplate-light;
+			justify = center;
+			rect = 458,371,576,385;
+			text = "Attack Freely";
+			uvcoords = 0.000000,0.000000,1.000000,1.000000;
+			wrap_mode = clamp;
+		}
+	}
+	[t:button,n:button_chat]
+	{
+	  f alpha = 1.000000;
+	  b common_control = false;
+		common_template = ;
+	  i draw_order = 89;
+		rect = 540,425,572,445;
+		texture = b_gui_ig_mnu_chat_up;
+		uvcoords = 0.000000,0.375000,1.000000,1.000000;
+		wrap_mode = clamp;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		bottom_anchor = 75;
+		right_anchor = 100;
+		group = mp_chat;
+		visible = false;
+		rollover_help = button_chat;
+
+		[messages]
+		{
+			onbuttonpress = notify(mp_chat);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_chat_dwn);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_chat_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_chat_up);
+			onrollover = loadtexture(b_gui_ig_mnu_chat_hov);
+		}
+	}
+	[t:button,n:button_collect_loot]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 75;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+	  x draw_order = 79;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 571,425,603,445;
+		right_anchor = 69;		rollover_help = collect_loot;
+		texture = b_gui_ig_mnu_get_loot_up;
+		uvcoords = 0.000000,0.375000,1.000000,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(collect_loot);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_get_loot_down);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_get_loot_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_get_loot_up);
+			onrollover = loadtexture(b_gui_ig_mnu_get_loot_hov);
+		}
+	}
+	[t:button,n:button_disband]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 168;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+		disable_color = 0xff5f5f5f;
+	  x draw_order = 74;
+		group = fc_max;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 602,332,635,353;
+		right_anchor = 38;
+		rollover_help = button_disband;
+		texture = b_gui_ig_mnu_disband_up;
+		uvcoords = 0.000000,0.343750,1.031250,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(disband_selected_members);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_disband_dwn);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_disband_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_disband_up);
+			onrollover = loadtexture(b_gui_ig_mnu_disband_hov);
+		}
+	}
+	[t:button,n:button_field_commands_min]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 149;
+	  b common_control = false;
+		common_template = ;
+	  x draw_order = 87;
+		group = fc_max;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 615,351,636,426;
+		right_anchor = 25;
+		rollover_help = button_field_commands_min;
+		texture = b_gui_ig_mnu_fieldcom_r_up;
+		uvcoords = 0.000000,0.414063,0.656250,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(toggle_field_commands) & call(gen_slider_gamespeed_toggle_visibility$);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_fieldcom_r_dwn);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_fieldcom_r_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_fieldcom_r_up);
+			onrollover = loadtexture(b_gui_ig_mnu_fieldcom_r_hov);
+		}
+	}
+	[t:button,n:button_field_commands_max]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 149;
+	  b common_control = false;
+		common_template = ;
+	  x draw_order = 87;
+		group = fc_max;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 615,351,636,426;
+		right_anchor = 25;
+		rollover_help = button_field_commands_max;
+		texture = b_gui_ig_mnu_fieldcom_l_up;
+		uvcoords = 0.000000,0.414063,0.656250,1.000000;
+		wrap_mode = clamp;
+		visible = false;
+		[messages]
+		{
+			onbuttonpress = notify(toggle_field_commands) & call(gen_slider_gamespeed_toggle_visibility$);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_fieldcom_l_dwn);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_fieldcom_l_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_fieldcom_l_up);
+			onrollover = loadtexture(b_gui_ig_mnu_fieldcom_l_hov);
+		}
+	}
+	[t:checkbox,n:button_follow]
+	{
+	  f alpha = 1.000000;		
+	  b common_control = false;
+		common_template = ;
+	  x draw_order = 88;
+		group = fc_max;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 519,284,563,308;
+		right_anchor = 69;
+		bottom_anchor = 99;
+		rollover_help = follow_on;
+		texture = b_gui_ig_mnu_follow_on_up;
+		uvcoords = 0.000000,0.250000,0.687500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{			
+			oncheck = notify(follow) & setrolloverhelp(follow_on) & loadtexture(b_gui_ig_mnu_follow_on_up);
+			
+			onlbuttondown = loadtexture(b_gui_ig_mnu_follow_off_dwn);
+			onlbuttonup	= loadtexture(b_gui_ig_mnu_follow_off_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_follow_off_up);
+			onrollover = loadtexture(b_gui_ig_mnu_follow_off_hov);
+
+			onlbuttondownchecked = loadtexture(b_gui_ig_mnu_follow_on_down);
+			onlbuttonupchecked	= loadtexture(b_gui_ig_mnu_follow_on_up);
+			onrolloffchecked	= loadtexture(b_gui_ig_mnu_follow_on_up);
+			onrolloverchecked	= loadtexture(b_gui_ig_mnu_follow_on_hov);
+						
+			onuncheck = notify(follow) & setrolloverhelp(follow_off) & loadtexture(b_gui_ig_mnu_follow_off_up);
+			
+		}
+	}
+	[t:radio_button,n:button_formation_circle]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 99;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+	  x draw_order = 30;
+		group = formations;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		radio_group = radio_formations;
+		rect = 547,401,572,425;
+		right_anchor = 93;
+		rollover_help = formation_circle;
+		texture = b_gui_ig_mnu_form7_up;
+		uvcoords = 0.000000,0.250000,0.781250,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(formation_circle) &
+								loadtexture(b_gui_ig_mnu_form7_dwn);
+
+			onlbuttondown = loadtexture(b_gui_ig_mnu_form7_dwn);
+			onrolloff = loadtexture(b_gui_ig_mnu_form7_up);
+			onrollover = loadtexture(b_gui_ig_mnu_form7_hov);			
+
+			onuncheck = loadtexture(b_gui_ig_mnu_form7_up);
+		}
+	}
+	[t:radio_button,n:button_formation_column]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 99;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+	  x draw_order = 26;
+		group = formations;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		radio_group = radio_formations;
+		rect = 475,401,500,425;
+		right_anchor = 165;
+		rollover_help = formation_column;
+		texture = b_gui_ig_mnu_form3_up;
+		uvcoords = 0.000000,0.250000,0.781250,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(formation_column) &
+								loadtexture(b_gui_ig_mnu_form3_dwn);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_form3_dwn);
+			onuncheck = loadtexture(b_gui_ig_mnu_form3_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_form3_up);
+			onrollover = loadtexture(b_gui_ig_mnu_form3_hov);			
+		}
+	}
+	[t:radio_button,n:button_formation_double_column]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 99;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+	  x draw_order = 27;
+		group = formations;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		radio_group = radio_formations;
+		rect = 499,401,524,425;
+		right_anchor = 141;
+		rollover_help = formation_double_column;
+		texture = b_gui_ig_mnu_form4_up;
+		uvcoords = 0.000000,0.250000,0.781250,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(formation_double_column) &
+								loadtexture(b_gui_ig_mnu_form4_dwn);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_form4_dwn);
+			onuncheck = loadtexture(b_gui_ig_mnu_form4_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_form4_up);
+			onrollover = loadtexture(b_gui_ig_mnu_form4_hov);			
+		}
+	}
+	[t:radio_button,n:button_formation_double_row]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 99;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+	  x draw_order = 25;
+		group = formations;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		radio_group = radio_formations;
+		rect = 452,401,477,425;
+		right_anchor = 188;
+		rollover_help = formation_double_row;
+		texture = b_gui_ig_mnu_form2_up;
+		uvcoords = 0.000000,0.250000,0.781250,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(formation_double_row) &
+								loadtexture(b_gui_ig_mnu_form2_dwn);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_form2_dwn);
+			onuncheck = loadtexture(b_gui_ig_mnu_form2_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_form2_up);
+			onrollover = loadtexture(b_gui_ig_mnu_form2_hov);			
+		}
+	}
+	[t:radio_button,n:button_formation_pyramid]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 99;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+	  x draw_order = 29;
+		group = formations;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		radio_group = radio_formations;
+		rect = 523,401,548,425;
+		right_anchor = 117;
+		rollover_help = formation_pyramid;
+		texture = b_gui_ig_mnu_form6_dwn;
+		uvcoords = 0.000000,0.250000,0.781250,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(formation_pyramid) &
+								loadtexture(b_gui_ig_mnu_form6_dwn);
+			oncreated = setstate(1);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_form6_dwn);
+			onuncheck = loadtexture(b_gui_ig_mnu_form6_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_form6_up);
+			onrollover = loadtexture(b_gui_ig_mnu_form6_hov);			
+		}
+	}
+	[t:radio_button,n:button_formation_row]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 99;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+	  x draw_order = 24;
+		group = formations;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		radio_group = radio_formations;
+		rect = 428,401,453,425;
+		right_anchor = 212;
+		rollover_help = formation_row;
+		texture = b_gui_ig_mnu_form1_up;
+		uvcoords = 0.000000,0.250000,0.781250,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(formation_row) &
+								loadtexture(b_gui_ig_mnu_form1_dwn);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_form1_dwn);
+			onuncheck = loadtexture(b_gui_ig_mnu_form1_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_form1_up);
+			onrollover = loadtexture(b_gui_ig_mnu_form1_hov);			
+		}
+	}
+	[t:button,n:button_minimize_fc]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 75;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+	  x draw_order = 76;
+		group = fc_max;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 602,425,635,445;
+		right_anchor = 38;
+		rollover_help = button_minimize_fc;
+		texture = b_gui_ig_mnu_minimize-up;
+		uvcoords = 0.000000,0.375000,0.515625,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(minimize_fc) & call(gen_slider_gamespeed_toggle_visibility$);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_minimize-dwn);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_minimize-up);
+			onrolloff = loadtexture(b_gui_ig_mnu_minimize-up);
+			onrollover = loadtexture(b_gui_ig_mnu_minimize-hov);			
+		}
+	}
+	[t:button,n:button_maximize_fc]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 75;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+	  x draw_order = 76;
+		group = fc_min;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 602,425,635,445;
+		right_anchor = 38;
+		rollover_help = button_maximize_fc;
+		texture = b_gui_ig_mnu_minimize-up;		
+		uvcoords = 0.500000,0.375000,1.000000,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(maximize_fc) & call(gen_slider_gamespeed_toggle_visibility$);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_minimize-dwn);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_minimize-up);
+			onrolloff = loadtexture(b_gui_ig_mnu_minimize-up);
+			onrollover = loadtexture(b_gui_ig_mnu_minimize-hov);
+		}
+	}
+	[t:button,n:button_movement]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 147;
+	  b common_control = true;
+		common_template = button_4;
+	  x draw_order = 5;
+		group = orders;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 428,353,576,369;
+		right_anchor = 212;
+		rollover_help = button_movement;
+		uvcoords = 0.000000,0.000000,1.000000,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(orders_movement);
+		}
+		[t:text,n:text_movement]
+		{
+		  f alpha = 1.000000;
+		  b common_control = false;
+			common_template = ;
+		  x draw_order = 21;
+		  x font_color = -1;
+		  x font_size = 0;
+			font_type = b_gui_fnt_12p_copperplate-light;
+			justify = center;
+			rect = 464,355,576,369;
+			text = "Move Freely";
+			uvcoords = 0.000000,0.000000,1.000000,1.000000;
+			wrap_mode = clamp;
+		}
+	}
+	[t:button,n:button_selectall]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 168;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+		disable_color = 0xff5f5f5f;
+	  x draw_order = 73;
+		group = fc_max;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 571,332,603,352;
+		right_anchor = 69;
+		rollover_help = button_selectall;
+		texture = b_gui_ig_mnu_select_up;
+		uvcoords = 0.000000,0.375000,1.000000,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(select_all_members);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_select_dwn);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_select_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_select_up);
+			onrollover = loadtexture(b_gui_ig_mnu_select_hov);
+		}
+	}
+	// TAT 5/7/03 - button for unsummoning creatures of all selected players
+	[t:button,n:button_unsummon_creatures]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 168;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+		disable_color = 0xff5f5f5f;
+	  x draw_order = 73;
+		group = orders;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 538,332,570,352;
+		right_anchor = 101;
+		rollover_help = button_unsummon_creature;
+		texture = b_gui_ig_mnu_unsummon_creature_up;
+		uvcoords = 0.000000,0.375000,1.000000,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(unsummon_creatures);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_unsummon_creature_dwn);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_unsummon_creature_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_unsummon_creature_up);
+			onrollover = loadtexture(b_gui_ig_mnu_unsummon_creature_hov);
+		}
+	}
+
+	// JCD 6/13/03 - button for untransforming all 
+	[t:button,n:button_untransform_characters]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 168;
+	  b common_control = false;
+		common_template = ;
+		consumable = true;
+		disable_color = 0xff5f5f5f;
+	  x draw_order = 73;
+		group = orders;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 505,332,537,352;
+		right_anchor = 133;
+		rollover_help = button_untransform_character;
+		texture = b_gui_ig_mnu_untransform_characters_up;
+		uvcoords = 0.000000,0.375000,1.000000,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(untransform_characters);
+			onlbuttondown = loadtexture(b_gui_ig_mnu_untransform_characters_dwn);
+			onlbuttonup = loadtexture(b_gui_ig_mnu_untransform_characters_up);
+			onrolloff = loadtexture(b_gui_ig_mnu_untransform_characters_up);
+			onrollover = loadtexture(b_gui_ig_mnu_untransform_characters_hov);
+		}
+	}
+	
+	[t:button,n:button_targeting]
+	{
+	  f alpha = 1.000000;
+		bottom_anchor = 115;
+	  b common_control = true;
+		common_template = button_4;
+	  x draw_order = 9;
+		group = orders;
+		is_bottom_anchor = true;
+		is_right_anchor = true;
+		rect = 428,385,576,401;
+		right_anchor = 212;
+		rollover_help = button_targeting;
+		uvcoords = 0.000000,0.000000,1.000000,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			onbuttonpress = notify(orders_targeting);
+		}
+		[t:text,n:text_targeting]
+		{
+		  f alpha = 1.000000;
+		  b common_control = false;
+			common_template = ;
+		  x draw_order = 21;
+		  x font_color = -1;
+		  x font_size = 0;
+			font_type = b_gui_fnt_12p_copperplate-light;
+			justify = center;
+			rect = 452,387,576,401;
+			text = "Target Weakest";
+			uvcoords = 0.000000,0.000000,1.000000,1.000000;
+			wrap_mode = clamp;
+		}
+	}
+	[t:radio_button,n:radio_button_attack_fightback]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 130;
+	  b common_control = true;
+		common_template = crystal;
+	  x draw_order = 136;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		radio_group = radio_attack;
+		rect = 587,370,599,383;
+	  i right_anchor = 53;
+		rollover_help = attack_fightback;
+		texture = b_gui_cmn_crystal_off_up;
+		uvcoords = 0.000000,0.187500,0.812500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(orders_change);
+
+			onrolloff = loadtexture(b_gui_cmn_crystal_off_up);
+			onrolloffchecked = loadtexture(b_gui_cmn_crystal_on_up);
+
+			onrollover = loadtexture(b_gui_cmn_crystal_off_hov);
+			onrolloverchecked = loadtexture(b_gui_cmn_crystal_on_hov);
+			
+			onlbuttondown = loadtexture(b_gui_cmn_crystal_off_dwn);
+			onlbuttondownchecked = loadtexture(b_gui_cmn_crystal_on_dwn);
+			
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_off_up);
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_on_up);
+		}
+	}
+	[t:radio_button,n:radio_button_attack_free]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 130;
+	  b common_control = true;
+		common_template = crystal;
+	  x draw_order = 135;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		radio_group = radio_attack;
+		rect = 574,370,586,383;
+	  i right_anchor = 66;
+		rollover_help = attack_free;
+		texture = b_gui_cmn_crystal_off_up;
+		uvcoords = 0.000000,0.187500,0.812500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(orders_change);
+			oncreate = setcheck(1);			
+
+			onrolloff = loadtexture(b_gui_cmn_crystal_off_up);
+			onrolloffchecked = loadtexture(b_gui_cmn_crystal_on_up);
+
+			onrollover = loadtexture(b_gui_cmn_crystal_off_hov);
+			onrolloverchecked = loadtexture(b_gui_cmn_crystal_on_hov);
+			
+			onlbuttondown = loadtexture(b_gui_cmn_crystal_off_dwn);
+			onlbuttondownchecked = loadtexture(b_gui_cmn_crystal_on_dwn);
+			
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_off_up);
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_on_up);
+		}
+	}
+	[t:radio_button,n:radio_button_attack_holdfire]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 130;
+	  b common_control = true;
+		common_template = crystal;
+	  x draw_order = 107;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		radio_group = radio_attack;
+		rect = 600,370,612,383;
+	  i right_anchor = 40;
+		rollover_help = attack_holdfire;
+		texture = b_gui_cmn_crystal_off_up;
+		uvcoords = 0.000000,0.187500,0.812500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(orders_change);
+			
+			onrolloff = loadtexture(b_gui_cmn_crystal_off_up);
+			onrolloffchecked = loadtexture(b_gui_cmn_crystal_on_up);
+
+			onrollover = loadtexture(b_gui_cmn_crystal_off_hov);
+			onrolloverchecked = loadtexture(b_gui_cmn_crystal_on_hov);
+			
+			onlbuttondown = loadtexture(b_gui_cmn_crystal_off_dwn);
+			onlbuttondownchecked = loadtexture(b_gui_cmn_crystal_on_dwn);
+			
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_off_up);
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_on_up);
+		}
+	}
+	[t:radio_button,n:radio_button_movement_engage]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 146;
+	  b common_control = true;
+		common_template = crystal;
+	  x draw_order = 110;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		radio_group = radio_movement;
+		rect = 587,354,599,367;
+	  i right_anchor = 53;
+		rollover_help = movement_engage;
+		texture = b_gui_cmn_crystal_off_up;
+		uvcoords = 0.000000,0.187500,0.812500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(orders_change);
+			
+			onrolloff = loadtexture(b_gui_cmn_crystal_off_up);
+			onrolloffchecked = loadtexture(b_gui_cmn_crystal_on_up);
+
+			onrollover = loadtexture(b_gui_cmn_crystal_off_hov);
+			onrolloverchecked = loadtexture(b_gui_cmn_crystal_on_hov);
+			
+			onlbuttondown = loadtexture(b_gui_cmn_crystal_off_dwn);
+			onlbuttondownchecked = loadtexture(b_gui_cmn_crystal_on_dwn);
+			
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_off_up);
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_on_up);
+		}
+	}
+	[t:radio_button,n:radio_button_movement_free]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 146;
+	  b common_control = true;
+		common_template = crystal;
+	  x draw_order = 122;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		radio_group = radio_movement;
+		rect = 574,354,586,367;
+	  i right_anchor = 66;
+		rollover_help = movement_free;
+		texture = b_gui_cmn_crystal_off_up;
+		uvcoords = 0.000000,0.187500,0.812500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(orders_change);
+			oncreate = setcheck(1);
+			
+			onrolloff = loadtexture(b_gui_cmn_crystal_off_up);
+			onrolloffchecked = loadtexture(b_gui_cmn_crystal_on_up);
+
+			onrollover = loadtexture(b_gui_cmn_crystal_off_hov);
+			onrolloverchecked = loadtexture(b_gui_cmn_crystal_on_hov);
+			
+			onlbuttondown = loadtexture(b_gui_cmn_crystal_off_dwn);
+			onlbuttondownchecked = loadtexture(b_gui_cmn_crystal_on_dwn);
+			
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_off_up);
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_on_up);
+		}
+	}
+	[t:radio_button,n:radio_button_movement_holdground]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 146;
+	  b common_control = true;
+		common_template = crystal;
+	  x draw_order = 109;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		radio_group = radio_movement;
+		rect = 600,354,612,367;
+	  i right_anchor = 40;
+		rollover_help = movement_holdground;
+		texture = b_gui_cmn_crystal_off_up;
+		uvcoords = 0.000000,0.187500,0.812500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(orders_change);
+			
+			onrolloff = loadtexture(b_gui_cmn_crystal_off_up);
+			onrolloffchecked = loadtexture(b_gui_cmn_crystal_on_up);
+
+			onrollover = loadtexture(b_gui_cmn_crystal_off_hov);
+			onrolloverchecked = loadtexture(b_gui_cmn_crystal_on_hov);
+			
+			onlbuttondown = loadtexture(b_gui_cmn_crystal_off_dwn);
+			onlbuttondownchecked = loadtexture(b_gui_cmn_crystal_on_dwn);
+			
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_off_up);
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_on_up);
+		}
+	}
+	[t:radio_button,n:radio_button_target_closest]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 114;
+	  b common_control = true;
+		common_template = crystal;
+	  x draw_order = 151;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		radio_group = radio_targeting;
+		rect = 574,386,586,399;
+	  i right_anchor = 66;
+		rollover_help = target_closest;
+		texture = b_gui_cmn_crystal_off_up;
+		uvcoords = 0.000000,0.187500,0.812500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(orders_change);
+			oncreate = setcheck(1);
+
+			onrolloff = loadtexture(b_gui_cmn_crystal_off_up);
+			onrolloffchecked = loadtexture(b_gui_cmn_crystal_on_up);
+
+			onrollover = loadtexture(b_gui_cmn_crystal_off_hov);
+			onrolloverchecked = loadtexture(b_gui_cmn_crystal_on_hov);
+			
+			onlbuttondown = loadtexture(b_gui_cmn_crystal_off_dwn);
+			onlbuttondownchecked = loadtexture(b_gui_cmn_crystal_on_dwn);
+			
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_off_up);
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_on_up);
+		}
+	}
+	[t:radio_button,n:radio_button_target_strongest]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 114;
+	  b common_control = true;
+		common_template = crystal;
+	  x draw_order = 154;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		radio_group = radio_targeting;
+		rect = 587,386,599,399;
+	  i right_anchor = 53;
+		rollover_help = target_strongest;
+		texture = b_gui_cmn_crystal_off_up;
+		uvcoords = 0.000000,0.187500,0.812500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(orders_change);
+			
+			onrolloff = loadtexture(b_gui_cmn_crystal_off_up);
+			onrolloffchecked = loadtexture(b_gui_cmn_crystal_on_up);
+
+			onrollover = loadtexture(b_gui_cmn_crystal_off_hov);
+			onrolloverchecked = loadtexture(b_gui_cmn_crystal_on_hov);
+			
+			onlbuttondown = loadtexture(b_gui_cmn_crystal_off_dwn);
+			onlbuttondownchecked = loadtexture(b_gui_cmn_crystal_on_dwn);
+			
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_off_up);
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_on_up);
+		}
+	}
+	[t:radio_button,n:radio_button_target_weakest]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 114;
+	  b common_control = true;
+		common_template = crystal;
+	  x draw_order = 151;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		radio_group = radio_targeting;
+		rect = 600,386,612,399;
+	  i right_anchor = 40;
+		rollover_help = target_weakest;
+		texture = b_gui_cmn_crystal_off_up;
+		uvcoords = 0.000000,0.187500,0.812500,1.000000;
+		wrap_mode = clamp;
+		[messages]
+		{
+			oncheck = notify(orders_change);
+			
+			onrolloff = loadtexture(b_gui_cmn_crystal_off_up);
+			onrolloffchecked = loadtexture(b_gui_cmn_crystal_on_up);
+
+			onrollover = loadtexture(b_gui_cmn_crystal_off_hov);
+			onrolloverchecked = loadtexture(b_gui_cmn_crystal_on_hov);
+			
+			onlbuttondown = loadtexture(b_gui_cmn_crystal_off_dwn);
+			onlbuttondownchecked = loadtexture(b_gui_cmn_crystal_on_dwn);
+			
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_off_up);
+			onlbuttonup = loadtexture(b_gui_cmn_crystal_on_up);
+		}
+	}
+	[t:window,n:window_field_panel]
+	{
+	  f alpha = 1.000000;
+	  i bottom_anchor = 149;
+	  b common_control = false;
+		common_template = ;
+	  x draw_order = 90;
+		group = fc_max;
+	  b is_bottom_anchor = true;
+	  b is_right_anchor = true;
+		rect = 571,351,616,402;
+	  i right_anchor = 69;
+		texture = b_gui_ig_mnu_fieldcom;
+		uvcoords = 0.000000,0.203125,0.703125,1.000000;
+		wrap_mode = clamp;
+	}
+}
