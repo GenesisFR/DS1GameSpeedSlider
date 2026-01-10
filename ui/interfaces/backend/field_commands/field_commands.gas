@@ -14,6 +14,7 @@
 				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
 				curSpeed$ = slider$.Value * 0.1;
 				
+				// clamp speed
 				if (curSpeed$ >= minSpeed$ && curSpeed$ <= maxSpeed$)
 				{
 					WorldOptions.SetGameSpeed(curSpeed$, true);
@@ -23,7 +24,7 @@
 		
 		void gen_slider_gamespeed_destroyed$()
 		{
-			// speeds above 6.0 mess with the main menu animations
+			// speeds above 6.0 mess with the main menu animations so we revert to default
 			WorldOptions.SetGameSpeed(1.0);
 		}
 		
@@ -31,7 +32,7 @@
 		{
             if (WorldState.CurrentState == WS_SP_INGAME)
 			{
-				// sync the slider visibility with the one of the move button
+				// sync the slider visibility with the visibility of the movement button
 				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
 				UIButton moveButton$ = QueryDerivedButton(UIShell.FindUIWindow("button_movement", "field_commands"));
 				slider$.visible = moveButton$.visible;
@@ -40,20 +41,17 @@
 		
 		void gen_slider_gamespeed_itemactivate$()
 		{
-			UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
-			
-			// you can't change the game speed in MP
-            if (WorldState.CurrentState == WS_MP_INGAME)
+            if (WorldState.CurrentState == WS_SP_INGAME)
 			{
-				slider$.visible = false;
-				return;
+				curSpeed$ = WorldOptions.GameSpeed;
+				gen_slider_gamespeed_toggle_visibility$();
+				
+				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
+				slider$.value = Math.ToInt(WorldOptions.GameSpeed * 10.0);
+			
+				// force a UI refresh
+				UIShell.SendUIMessage(msg_calculateslidersize, "gen_slider_gamespeed", "field_commands");
 			}
-			
-			curSpeed$ = WorldOptions.GameSpeed;
-			gen_slider_gamespeed_toggle_visibility$();
-			
-			// force a UI refresh
-			UIShell.SendUIMessage(msg_calculateslidersize, "gen_slider_gamespeed", "field_commands");
 		}
 	]];
 	
@@ -77,6 +75,7 @@
 		default_value = 10;
 		show_popup_value = true;
 		popup_value_font = b_gui_fnt_12p_copperplate-light;
+		visible = false;
 		[messages]
 		{
 			onbuttonpress = playsound(s_e_IH_select_char);
