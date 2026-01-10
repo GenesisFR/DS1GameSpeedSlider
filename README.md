@@ -8,6 +8,10 @@ It is compatible with DS and LOA and should not conflict with other mods (unless
 
 It's available to download on [NexusMods](https://www.nexusmods.com/dungeonsiege1/mods/261).
 
+## Requirements
+
+[Ikkyo's DSDLL](http://ds.gemsite.org/data/ikkyo_dsdll.zip)
+
 ## Installation
 
 - Place it in your Resources folder.
