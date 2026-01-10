@@ -9,7 +9,7 @@
 		void gen_slider_gamespeed_change$()
 		{
 			// the slider value isn't initialized until we're ingame
-            if (WorldState.CurrentState == WS_SP_INGAME || WorldState.CurrentState == WS_MP_INGAME)
+            if (WorldState.CurrentState == WS_SP_INGAME)
 			{
 				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
 				curSpeed$ = slider$.Value * 0.1;
@@ -29,19 +29,28 @@
 		
 		void gen_slider_gamespeed_toggle_visibility$()
 		{
-			// sync the slider visibility with the one of the move button
-			UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
-			UIButton moveButton$ = QueryDerivedButton(UIShell.FindUIWindow("button_movement", "field_commands"));
-			slider$.visible = moveButton$.visible;
+            if (WorldState.CurrentState == WS_SP_INGAME)
+			{
+				// sync the slider visibility with the one of the move button
+				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
+				UIButton moveButton$ = QueryDerivedButton(UIShell.FindUIWindow("button_movement", "field_commands"));
+				slider$.visible = moveButton$.visible;
+			}
 		}
 		
 		void gen_slider_gamespeed_itemactivate$()
 		{
+			UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
+			
+			// you can't change the game speed in MP
+            if (WorldState.CurrentState == WS_MP_INGAME)
+			{
+				slider$.visible = false;
+				return;
+			}
+			
 			curSpeed$ = WorldOptions.GameSpeed;
 			gen_slider_gamespeed_toggle_visibility$();
-			
-			UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
-			slider$.value = Math.ToInt(WorldOptions.GameSpeed * 10.0);
 			
 			// force a UI refresh
 			UIShell.SendUIMessage(msg_calculateslidersize, "gen_slider_gamespeed", "field_commands");
