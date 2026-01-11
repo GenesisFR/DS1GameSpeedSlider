@@ -24,7 +24,7 @@ It's available to download on [NexusMods](https://www.nexusmods.com/dungeonsiege
 
 ## Known issues
 
-- On the GOG version, the button on the slider does not get updated upon retrieving the world speed after loading a game. It's visual a bug only and does not affect the actual value of the slider or the functionality of the mod.à
+- On the GOG version, the button on the slider does not get updated upon retrieving the world speed after loading a game. It's a visual bug only and does not affect the actual value of the slider or the functionality of the mod.
 
 ## Credits
 
