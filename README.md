@@ -22,6 +22,10 @@ It's available to download on [NexusMods](https://www.nexusmods.com/dungeonsiege
 - The new slider doesn't get updated when interacting with the speed slider in the game options or the speed hotkeys, both of which are still capped at a speed of 1.2. I won't fix it because it's most likely source locked.
 - You can't change the game speed in multiplayer.
 
+## Known issues
+
+- On the GOG version, the button on the slider does not get updated upon retrieving the world speed after loading a game. It's visual a bug only and does not affect the actual value of the slider or the functionality of the mod.à
+
 ## Credits
 
 \- Sadowson  
