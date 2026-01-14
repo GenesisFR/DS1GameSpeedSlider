@@ -44,5 +44,6 @@ Note: if you're going to use launch parameters, do not put a space before/after 
 ## Credits
 
 \- Sadowson  
+\- [cryden](https://www.nexusmods.com/profile/cryden)  
 \- [Starfall](https://www.nexusmods.com/profile/Starfalll)  
 \- [Firstie](https://www.nexusmods.com/profile/foerstj)
