@@ -2,55 +2,121 @@
 {
 	skrit = [[
 		owner = UIWindow;
-		float curSpeed$;
-		float minSpeed$ = 0.1;
-		float maxSpeed$ = 10.0;
+		bool showDebug$ = false;
 		
 		void gen_slider_gamespeed_change$()
 		{
-			// the slider value isn't initialized until we're ingame
-            if (WorldState.CurrentState == WS_SP_INGAME)
+			// slider values aren't initialized until we're ingame
+			if (WorldState.CurrentState == WS_SP_INGAME)
 			{
-				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
-				curSpeed$ = slider$.Value * 0.1;
+				// retrieve settings from DungeonSiege.ini
+				float minSpeed$ = Config.GetFloat("gen_min_speed", 0.1);
+				float maxSpeed$ = Config.GetFloat("gen_max_speed", 10.0);
+				bool showSpeed$ = Config.GetBool("gen_show_speed", true);
 				
-				// clamp speed
-				if (curSpeed$ >= minSpeed$ && curSpeed$ <= maxSpeed$)
+				// clamp min speed
+				if (minSpeed$ < 0.1 || minSpeed$ >= maxSpeed$)
 				{
-					WorldOptions.SetGameSpeed(curSpeed$, true);
+					minSpeed$ = 0.1;
 				}
+				
+				// clamp max speed
+				if (maxSpeed$ < 0.1 || maxSpeed$ <= minSpeed$)
+				{
+					maxSpeed$ = 10.0;
+				}
+				
+				// convert slider value to world speed
+				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
+				float curSpeed$ = Math.ToFloat(slider$.value) * 0.1 + minSpeed$ - 0.1;
+				
+				if (showDebug$)
+				{
+					Report.ScreenF("curSpeed$ = %f\n", curSpeed$);
+				}
+				
+				// set world speed
+				//if (curSpeed$ >= minSpeed$ && curSpeed$ <= maxSpeed$)
+				//{
+					WorldOptions.SetGameSpeed(curSpeed$, showSpeed$);
+				//}
 			}
 		}
 		
 		void gen_slider_gamespeed_destroyed$()
 		{
-			// speeds above 6.0 mess with the main menu animations so we revert to default
+			// world speeds above 6.0 mess with the main menu animations so we revert to default to be safe
 			WorldOptions.SetGameSpeed(1.0);
-		}
-		
-		void gen_slider_gamespeed_toggle_visibility$()
-		{
-            if (WorldState.CurrentState == WS_SP_INGAME)
-			{
-				// sync the slider visibility with the visibility of the movement button
-				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
-				UIButton moveButton$ = QueryDerivedButton(UIShell.FindUIWindow("button_movement", "field_commands"));
-				slider$.visible = moveButton$.visible;
-			}
 		}
 		
 		void gen_slider_gamespeed_itemactivate$()
 		{
-            if (WorldState.CurrentState == WS_SP_INGAME)
+			// slider values aren't initialized until we're ingame
+			if (WorldState.CurrentState == WS_SP_INGAME)
 			{
-				curSpeed$ = WorldOptions.GameSpeed;
-				gen_slider_gamespeed_toggle_visibility$();
+				// retrieve settings from DungeonSiege.ini
+				float minSpeed$ = Config.GetFloat("gen_min_speed", 0.1);
+				float maxSpeed$ = Config.GetFloat("gen_max_speed", 10.0);
+				bool showSpeed$ = Config.GetBool("gen_show_speed", true);
 				
+				// clamp min speed
+				if (minSpeed$ < 0.1 || minSpeed$ >= maxSpeed$)
+				{
+					minSpeed$ = 0.1;
+				}
+				
+				// clamp max speed
+				if (maxSpeed$ < 0.1 || maxSpeed$ <= minSpeed$)
+				{
+					maxSpeed$ = 10.0;
+				}
+				
+				// clamp current speed
+				float curSpeed$ = WorldOptions.GameSpeed;
+				if (curSpeed$ <= minSpeed$)
+				{
+					curSpeed$ = minSpeed$;
+				}
+				else if (curSpeed$ >= maxSpeed$)
+				{
+					curSpeed$ = maxSpeed$;
+				}
+				
+				// convert min/max speeds to correct slider values (we add 0.001 for occasional rounding errors)
+				int sliderMaxValue$ = Math.ToInt((maxSpeed$ - minSpeed$) * 10.0 + 1.0 + 0.001);
+				int sliderValue$ = Math.ToInt((curSpeed$ - minSpeed$) * 10.0 + 1.0 + 0.001);
+				
+				if (showDebug$)
+				{
+					Report.ScreenF("WorldOptions.GameSpeed = %f\n", WorldOptions.GameSpeed);
+					Report.ScreenF("minSpeed$ = %f\n", minSpeed$);
+					Report.ScreenF("maxSpeed$ = %f\n", maxSpeed$);
+					Report.ScreenF("curSpeed$ = %f\n", curSpeed$);
+					Report.ScreenF("sliderMaxValue$ = %d\n", sliderMaxValue$);
+					Report.ScreenF("sliderValue$ = %d\n", sliderValue$);
+				}
+				
+				// set slider properties
 				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
-				slider$.value = Math.ToInt(WorldOptions.GameSpeed * 10.0);
-			
-				// force a UI refresh
+				slider$.maxValue = sliderMaxValue$;
+				slider$.value = sliderValue$;
+				
+				// make sure the world speed is set to clamped values
+				WorldOptions.SetGameSpeed(curSpeed$, showSpeed$);
+				
+				// force a UI refresh to update the value button
 				UIShell.SendUIMessage(msg_calculateslidersize, "gen_slider_gamespeed", "field_commands");
+			}
+		}
+		
+		void gen_slider_gamespeed_toggle_visibility$()
+		{
+			if (WorldState.CurrentState == WS_SP_INGAME)
+			{
+				// sync the slider visibility with the movement button so it's hidden along with the field commands panel
+				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
+				UIButton moveButton$ = QueryDerivedButton(UIShell.FindUIWindow("button_movement", "field_commands"));
+				slider$.visible = moveButton$.visible;
 			}
 		}
 	]];
@@ -70,7 +136,7 @@
 		wrap_mode = clamp;
 		slide_axis = horizontal;
 		min_value = 1;
-		max_value = 100; // should always be equal to maxSpeed$ * 10
+		max_value = 100;
 		step_value = 1;
 		default_value = 10;
 		show_popup_value = true;
@@ -80,8 +146,9 @@
 		{
 			onbuttonpress = playsound(s_e_IH_select_char);
 			onchange = call(gen_slider_gamespeed_change$);
-			ondestroyed = call(gen_slider_gamespeed_destroyed$); // fixes a bug with the main menu animations at high speeds
-			onitemactivate = call(gen_slider_gamespeed_itemactivate$); // hides the slider if the field commands were initially hidden
+			ondestroyed = call(gen_slider_gamespeed_destroyed$);
+			// hides the slider if the field commands panel was initially hidden
+			onitemactivate = call(gen_slider_gamespeed_itemactivate$) & call(gen_slider_gamespeed_toggle_visibility$);
 		}
 	}
 	
