@@ -37,7 +37,8 @@ Note: if you're going to use launch parameters, do not put a space before/after 
 ## Limitations
 
 - The new slider doesn't get updated when interacting with the speed slider in the game options or the speed hotkeys, both of which are still capped at a speed of 1.2. I won't fix it because it's most likely source locked.
-- The slider's minimum value is always 1, therefore if you use a minimum value different than 0.1, your current value won't be equal to the game speed * 10. This is to account for custom miminum values and can't be fixed.
+- The slider's minimum value is always 1, therefore if you use a minimum value different than 0.1, your current value won't be equal to the game speed * 10. This is to account for custom mininum values and can't be fixed.
+- The slider doesn't show up when loading a game that had the minimap open (will be fixed soon).
 - The speed can only be changed in 0.1 increments.
 - The speed can't be changed in multiplayer.
 
