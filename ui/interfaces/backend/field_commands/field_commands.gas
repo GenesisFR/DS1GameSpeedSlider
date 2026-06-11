@@ -109,7 +109,7 @@
 					// make sure the world speed is set to clamped values
 					WorldOptions.SetGameSpeed(curSpeed$, showSpeed$);
 					
-					// force a UI refresh to update the value button
+					// force a UI refresh to update the slider button
 					UIShell.SendUIMessage(msg_calculateslidersize, "gen_slider_gamespeed", "field_commands");
 				}
 			}
@@ -119,12 +119,19 @@
 		{
 			if (WorldState.CurrentState == WS_SP_INGAME || (WorldState.CurrentState == WS_MEGA_MAP && World.IsSinglePlayer()))
 			{
-				// sync the slider visibility with the movement button so it's hidden along with the field commands panel
 				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
 				if (slider$ != NULL)
 				{
+					// sync the slider visibility with the movement button so it's hidden along with the field commands panel
+					bool autoHide$ = Config.GetBool("gen_auto_hide", true);
+					
+					if (showDebug$)
+					{
+						Report.ScreenF("autoHide$ = %d\n", autoHide$);
+					}
+					
 					UIButton moveButton$ = QueryDerivedButton(UIShell.FindUIWindow("button_movement", "field_commands"));
-					slider$.visible = moveButton$.visible;
+					slider$.visible = !autoHide$ || (autoHide$ && moveButton$.visible);
 				}
 			}
 		}
