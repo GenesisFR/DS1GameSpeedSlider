@@ -7,7 +7,7 @@
 		void gen_slider_gamespeed_change$()
 		{
 			// slider values aren't initialized until we're ingame
-			if (WorldState.CurrentState == WS_SP_INGAME)
+			if (WorldState.CurrentState == WS_SP_INGAME || WorldState.CurrentState == WS_MEGA_MAP)
 			{
 				// retrieve settings from DungeonSiege.ini
 				float minSpeed$ = Config.GetFloat("gen_min_speed", 0.1);
@@ -55,7 +55,7 @@
 		void gen_slider_gamespeed_itemactivate$()
 		{
 			// slider values aren't initialized until we're ingame
-			if (WorldState.CurrentState == WS_SP_INGAME)
+			if (WorldState.CurrentState == WS_SP_INGAME || WorldState.CurrentState == WS_MEGA_MAP)
 			{
 				// retrieve settings from DungeonSiege.ini
 				float minSpeed$ = Config.GetFloat("gen_min_speed", 0.1);
@@ -117,7 +117,7 @@
 		
 		void gen_slider_gamespeed_toggle_visibility$()
 		{
-			if (WorldState.CurrentState == WS_SP_INGAME)
+			if (WorldState.CurrentState == WS_SP_INGAME || (WorldState.CurrentState == WS_MEGA_MAP && World.IsSinglePlayer()))
 			{
 				// sync the slider visibility with the movement button so it's hidden along with the field commands panel
 				UISlider slider$ = QueryDerivedSlider(UIShell.FindUIWindow("gen_slider_gamespeed", "field_commands"));
@@ -151,6 +151,7 @@
 		show_popup_value = true;
 		popup_value_font = b_gui_fnt_12p_copperplate-light;
 		visible = false;
+		
 		[messages]
 		{
 			onbuttonpress = playsound(s_e_IH_select_char);
