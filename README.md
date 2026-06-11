@@ -1,6 +1,6 @@
 # Genesis' game speed slider
 
-This mod for _Dungeon Siege 1_ adds a configurable slider below the field commands to change the game speed beyond the limits of the release version of the game.
+This mod for _Dungeon Siege 1_ adds a configurable slider below the field commands to change the game speed beyond the limits of both the development and release versions of the game.
 
 The slider gets hidden along with the field commands panel by default. The game speed is natively saved and restored in saved games.
 
