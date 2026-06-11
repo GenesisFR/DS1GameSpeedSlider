@@ -245,7 +245,8 @@
 		is_bottom_anchor = true;
 		is_right_anchor = true;
 		rect = 571,425,603,445;
-		right_anchor = 69;		rollover_help = collect_loot;
+		right_anchor = 69;
+		rollover_help = collect_loot;
 		texture = b_gui_ig_mnu_get_loot_up;
 		uvcoords = 0.000000,0.375000,1.000000,1.000000;
 		wrap_mode = clamp;
